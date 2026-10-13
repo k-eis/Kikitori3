@@ -31,14 +31,14 @@ body{
   line-height:1.7; padding:28px 16px 64px;
 }
 main{max-width:720px; margin:0 auto}
-header{display:flex; align-items:center; gap:14px; margin:0 0 20px 2px}
-.logo{width:46px; height:46px; flex:none}
+header{display:flex; align-items:center; gap:18px; margin:0 0 30px 2px}
+.logo{width:62px; height:62px; flex:none}
 .logo path{fill:none; stroke-width:5; stroke-linecap:round}
 .logo .a{stroke:var(--accent)} .logo .b{stroke:var(--sage)} .logo .c{stroke:var(--sand)} .logo .d{stroke:var(--clay)}
-h1{margin:0; font-size:1.65rem; line-height:1.15; font-weight:500; letter-spacing:.01em}
+h1{margin:0; font-size:2.75rem; line-height:1.1; font-weight:500; letter-spacing:.01em}
 h1 span{color:var(--accent)}
-h1 small{margin-left:.7em; font-size:.74rem; font-weight:400; color:var(--muted); letter-spacing:.12em}
-.sub{margin:3px 0 0; color:var(--muted); font-size:.8rem}
+h1 small{margin-left:.7em; font-size:.95rem; font-weight:400; color:var(--muted); letter-spacing:.12em}
+.sub{margin:6px 0 0; color:var(--ink); font-size:1.03rem; font-weight:500}
 
 /* 本体 */
 .device{position:relative; overflow:hidden; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px 18px 18px}
@@ -96,7 +96,7 @@ h1 small{margin-left:.7em; font-size:.74rem; font-weight:400; color:var(--muted)
 .key.alt.on .disc{background:var(--clay); border-color:var(--clay); color:var(--clay-ink); animation:pulse 1.6s ease-out infinite}
 .key.alt.on{color:var(--ink)}
 
-.line{margin-top:16px; border-top:1px solid var(--line); padding-top:12px}
+.line{margin:14px 2px 12px}
 #status{font-size:.82rem; color:var(--muted); min-height:1.4em}
 #status.err{color:var(--err)}
 progress{
@@ -185,6 +185,39 @@ progress::-moz-progress-bar{background:var(--accent)}
 .credit a{color:inherit; text-decoration:underline; text-underline-offset:2px}
 .credit a:hover{color:var(--ink)}
 .credit a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.cards{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+.card{background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--accent); border-radius:12px; padding:22px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.card.tab{border-top-color:var(--clay)}
+.card.off{opacity:.6}
+.card h3{margin:0; font-size:.98rem; font-weight:500}
+.card .lead{margin:0; font-size:.82rem; color:var(--muted)}
+.card .spacer{flex:1}
+.drop{border:1.5px dashed color-mix(in srgb, var(--muted) 45%, transparent); border-radius:10px; padding:28px 12px; text-align:center; font-size:.82rem; color:var(--muted); transition:background .15s, border-color .15s}
+.drop.over{background:var(--tint); border-color:var(--accent)}
+.drop .filebtn{margin-top:6px}
+.drop .fname{display:block; max-width:100%; margin:10px auto 0; font-size:.78rem}
+.how{list-style:none; margin:0; padding:0; display:grid; gap:11px; font-size:.82rem}
+.how li{display:flex; gap:10px}
+.how b{flex:none; width:22px; height:22px; border:1px solid var(--ink); border-radius:50%; display:grid; place-items:center; font-size:.74rem; font-weight:400; line-height:1}
+.go{all:unset; box-sizing:border-box; display:flex; align-items:center; gap:14px; cursor:pointer; font-size:.92rem; font-weight:500; color:var(--ink)}
+.go i{width:60px; height:60px; flex:none; border-radius:50%; display:grid; place-items:center; transition:transform .15s ease}
+.go:hover:not(:disabled) i{transform:translateY(-2px)}
+.go:focus-visible i{outline:2px solid var(--accent); outline-offset:3px}
+.go:disabled{opacity:.45; cursor:not-allowed}
+.go.file i{background:var(--accent); color:var(--accent-ink)}
+.go.file svg{width:22px; height:22px; fill:currentColor}
+.go.tab i{border:1.5px solid var(--clay); color:var(--clay)}
+.go.tab svg{width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round}
+.go.tab.on i{background:var(--clay); color:var(--clay-ink); animation:pulse 1.6s ease-out infinite}
+.strip{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 22px; margin-top:18px; display:flex; flex-wrap:wrap; gap:14px 36px; align-items:flex-start}
+.strip .slabel{width:100%; font-size:.75rem; color:var(--muted)}
+.sgroup{min-width:0}
+.sgroup .cap{font-size:.75rem; color:var(--muted); margin-bottom:4px}
+.sgroup .hint{margin:4px 0 0}
+.screen{margin-top:4px}
+@media (max-width:720px){ .cards{grid-template-columns:1fr} }
+@media (max-width:520px){ h1{font-size:2.1rem} .logo{width:48px; height:48px} .sub{font-size:.9rem} }
+@media (prefers-reduced-motion: reduce){ .go.tab.on i{animation:none} .go i, .drop{transition:none} }
 </style>
 </head>
 <body>
@@ -195,61 +228,72 @@ progress::-moz-progress-bar{background:var(--accent)}
     </svg>
     <div>
       <h1>Kiki<span>tori</span><small>聞き取り</small></h1>
-      <p class="sub">ブラウザの中でWhisperを動かします。動画・音声はどこにも送信されません。</p>
+      <p class="sub">ブラウザの中だけで動きます。動画・音声は外に送信されません。</p>
     </div>
   </header>
 
-  <h2 class="step first"><b>1</b>文字にする</h2>
-  <section class="device">
-    <div class="screen" id="screen">
-      <div class="idle"><div class="wave" id="wave" aria-hidden="true"></div><span class="empty">動画・音声を選ぶか、タブの音声を聞き取ります</span></div>
-      <video id="video" controls playsinline></video>
-    </div>
-
-    <div class="controls">
-      <div class="settings">
-        <div class="field">
-          <span>ファイル</span>
-          <span style="display:flex;align-items:center;gap:12px;min-width:0">
-            <label class="filebtn"><input type="file" id="file" accept="video/*,audio/*">選ぶ</label>
-            <span class="fname" id="fname">未選択</span>
-          </span>
-        </div>
-        <div class="field">
-          <span>モデル</span>
-          <div class="mwrap"><div class="seg" role="radiogroup" aria-label="モデル">
-            <label><input type="radio" name="model" value="onnx-community/whisper-tiny"><span>速さ優先</span></label>
-            <label><input type="radio" name="model" value="onnx-community/whisper-base" checked><span>標準</span></label>
-            <label><input type="radio" name="model" value="onnx-community/whisper-small"><span>精度優先</span></label>
-          </div><p class="hint" id="modelhint" aria-live="polite"></p></div>
-        </div>
-        <div class="field">
-          <span>言語</span>
-          <div class="seg" role="radiogroup" aria-label="言語">
-            <label><input type="radio" name="lang" value="japanese" checked><span>日本語</span></label>
-            <label><input type="radio" name="lang" value="english"><span>English</span></label>
-            <label><input type="radio" name="lang" value=""><span>自動</span></label>
-          </div>
-        </div>
+  <h2 class="step first"><b>1</b>どちらの音声を文字にしますか？</h2>
+  <div class="cards">
+    <section class="card file">
+      <h3>ファイルの音声</h3>
+      <p class="lead">動画・音声ファイルを選んで、文字にします。</p>
+      <div class="drop" id="drop">
+        <span id="dropmsg">ここにファイルを落とす<br>または</span>
+        <label class="filebtn"><input type="file" id="file" accept="video/*,audio/*">選ぶ</label>
+        <div class="fname" id="fname">未選択</div>
       </div>
+      <div class="spacer"></div>
+      <button class="go file" id="start" disabled>
+        <i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></i>
+        <span>文字にする</span>
+      </button>
+    </section>
+    <section class="card tab" id="tabcard">
+      <h3>ページの音声</h3>
+      <ol class="how">
+        <li><b>1</b>動画ページを、別のタブで開く（まだ再生しない）</li>
+        <li><b>2</b>下のボタンを押し、共有画面で「Chromeタブ」を選んで「タブの音声も共有」にチェック</li>
+        <li><b>3</b>動画ページに戻って、再生する</li>
+      </ol>
+      <p class="lead" id="tabwhy" hidden>この機能は、PCのChromeで使えます。</p>
+      <div class="spacer"></div>
+      <button class="go tab" id="live">
+        <i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 12h-2"/></svg></i>
+        <span id="livecap">聞き取りを始める</span>
+      </button>
+    </section>
+  </div>
 
-      <div class="go">
-        <button class="key alt" id="live">
-          <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h2M8 8v8M12 5v14M16 8v8M20 12h-2"/></svg></span>
-          <span id="livecap">タブの音声</span>
-        </button>
-        <button class="key main" id="start" disabled>
-          <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
-          <span>動画・音声を文字に</span>
-        </button>
+  <div class="strip">
+    <div class="slabel">設定</div>
+    <div class="sgroup">
+      <div class="cap">モデル</div>
+      <div class="seg" role="radiogroup" aria-label="モデル">
+        <label><input type="radio" name="model" value="onnx-community/whisper-tiny"><span>速さ優先</span></label>
+        <label><input type="radio" name="model" value="onnx-community/whisper-base" checked><span>標準</span></label>
+        <label><input type="radio" name="model" value="onnx-community/whisper-small"><span>精度優先</span></label>
+      </div>
+      <p class="hint" id="modelhint" aria-live="polite"></p>
+    </div>
+    <div class="sgroup">
+      <div class="cap">言語</div>
+      <div class="seg" role="radiogroup" aria-label="言語">
+        <label><input type="radio" name="lang" value="japanese" checked><span>日本語</span></label>
+        <label><input type="radio" name="lang" value="english"><span>English</span></label>
+        <label><input type="radio" name="lang" value=""><span>自動</span></label>
       </div>
     </div>
+  </div>
 
-    <div class="line">
-      <div id="status" role="status" aria-live="polite"></div>
-      <progress id="bar" max="100" value="0" hidden></progress>
-    </div>
-  </section>
+  <div class="line">
+    <div id="status" role="status" aria-live="polite"></div>
+    <progress id="bar" max="100" value="0" hidden></progress>
+  </div>
+
+  <div class="screen" id="screen">
+    <div class="idle"><div class="wave" id="wave" aria-hidden="true"></div><span class="empty">動画・音声を選ぶか、タブの音声を聞き取ります</span></div>
+    <video id="video" controls playsinline></video>
+  </div>
 
   <h2 class="step"><b>2</b>直す<button class="linkbtn grow" id="load">保存した文字を読み込む</button></h2>
   <input type="file" id="loadfile" accept=".srt,.txt,text/plain" hidden>
@@ -355,9 +399,17 @@ function srtTime(t){
 }
 
 fileEl.addEventListener("change", () => {
-  if (busy){ fileEl.value = ""; return; }
   const f = fileEl.files[0];
-  if (!f) return;
+  fileEl.value = "";
+  acceptFile(f);
+});
+
+function acceptFile(f){
+  if (busy || !f) return;
+  if (!/^(video|audio)\//.test(f.type) && !/\.(mp4|m4a|mp3|wav|mov|webm|ogg|aac|flac|mkv)$/i.test(f.name)){
+    setStatus("動画か音声のファイルを選んでください。", true);
+    return;
+  }
   currentFile = f; mode = "file";
   $("fname").textContent = f.name;
   if (objUrl) URL.revokeObjectURL(objUrl);
@@ -367,7 +419,7 @@ fileEl.addEventListener("change", () => {
   segs = []; render();
   setStatus("");
   startEl.disabled = false;
-});
+}
 
 async function decodeAudio(file){
   const buf = await file.arrayBuffer();
@@ -446,7 +498,7 @@ startEl.addEventListener("click", async () => {
     setBar(null);
     setStatus("エラー：" + (e && e.message ? e.message : e) + "（動画に音声トラックがあるか、ブラウザが対応形式か確認してください）", true);
   } finally {
-    setBusy(false); startEl.disabled = false; $("live").disabled = false;
+    setBusy(false); startEl.disabled = false; $("live").disabled = !tabOK;
   }
 });
 
@@ -690,7 +742,7 @@ liveEl.addEventListener("click", async () => {
     setStatus("エラー：" + (e && e.message ? e.message : e), true);
   } finally {
     setBusy(false); liveOn = false; live = null;
-    liveEl.classList.remove("on"); liveCap.textContent = "タブの音声";
+    liveEl.classList.remove("on"); liveCap.textContent = "聞き取りを始める";
     startEl.disabled = !currentFile;
   }
 });
@@ -922,6 +974,20 @@ const showTHint = () => { $("tenginehint").textContent = TENGINE_HINT[val("tengi
 document.querySelectorAll('input[name="tengine"]').forEach((r) => r.addEventListener("change", showTHint));
 if (!("Translator" in self)) document.querySelector('input[name="tengine"][value="local"]').checked = true;
 showTHint();
+
+/* ---- 入口まわり：ドラッグ＆ドロップ／ページの音声が使えない環境の表示 ---- */
+const tabOK = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia)
+  && /Chrome\//.test(navigator.userAgent) && !/Mobi|Android/i.test(navigator.userAgent);
+if (!tabOK){
+  $("live").disabled = true;
+  $("tabcard").classList.add("off");
+  $("tabwhy").hidden = false;
+}
+const dropEl = $("drop");
+["dragenter", "dragover"].forEach((ev) => dropEl.addEventListener(ev, (e) => { e.preventDefault(); dropEl.classList.add("over"); }));
+["dragleave", "drop"].forEach((ev) => dropEl.addEventListener(ev, (e) => { e.preventDefault(); dropEl.classList.remove("over"); }));
+dropEl.addEventListener("drop", (e) => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) acceptFile(f); });
+["dragover", "drop"].forEach((ev) => window.addEventListener(ev, (e) => e.preventDefault()));
 
 /* ---- モデルの説明 ---- */
 const MODEL_HINT = {
