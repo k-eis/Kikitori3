@@ -174,6 +174,12 @@ progress::-moz-progress-bar{background:var(--accent)}
 .linkbtn:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
 .linkbtn:disabled{opacity:.4; cursor:not-allowed}
 .tools{margin:0 2px}
+.step .opt{font-size:.74rem; font-weight:400; color:var(--muted)}
+.field[hidden]{display:none}
+.engine,.outsel{margin:0 2px 12px}
+.engine .mwrap{min-width:0}
+#list .en{margin-top:4px; padding-left:10px; border-left:2px solid var(--accent); font-size:.92rem}
+#list .back{margin-top:2px; padding-left:10px; font-size:.78rem; color:var(--muted)}
 </style>
 </head>
 <body>
@@ -207,9 +213,9 @@ progress::-moz-progress-bar{background:var(--accent)}
         <div class="field">
           <span>モデル</span>
           <div class="mwrap"><div class="seg" role="radiogroup" aria-label="モデル">
-            <label><input type="radio" name="model" value="onnx-community/whisper-tiny"><span>tiny</span></label>
-            <label><input type="radio" name="model" value="onnx-community/whisper-base" checked><span>base</span></label>
-            <label><input type="radio" name="model" value="onnx-community/whisper-small"><span>small</span></label>
+            <label><input type="radio" name="model" value="onnx-community/whisper-tiny"><span>速さ優先</span></label>
+            <label><input type="radio" name="model" value="onnx-community/whisper-base" checked><span>標準</span></label>
+            <label><input type="radio" name="model" value="onnx-community/whisper-small"><span>精度優先</span></label>
           </div><p class="hint" id="modelhint" aria-live="polite"></p></div>
         </div>
         <div class="field">
@@ -260,8 +266,38 @@ progress::-moz-progress-bar{background:var(--accent)}
     <input id="rwith" type="text" placeholder="正しい言葉" aria-label="正しい言葉">
     <button id="rbtn">全部置換</button>
   </div>
+  <h2 class="step"><b>3</b>英語にする<span class="opt">必要なときだけ</span></h2>
+  <div class="field engine">
+    <span>翻訳</span>
+    <div class="mwrap">
+      <div class="seg" role="radiogroup" aria-label="翻訳の方式">
+        <label><input type="radio" name="tengine" value="chrome" checked><span>Chrome（PC用）</span></label>
+        <label><input type="radio" name="tengine" value="local"><span>スマホ用</span></label>
+      </div>
+      <p class="hint" id="tenginehint" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="fix">
+    <button class="key" id="tr" disabled>
+      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.3 3.5 5 3.5 8s-1 5.7-3.5 8c-2.5-2.3-3.5-5-3.5-8s1-5.7 3.5-8z"/></svg></span>
+      <span>英語にする</span>
+    </button>
+    <span class="arrow" aria-hidden="true">→</span>
+    <button class="key" id="back" disabled>
+      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6L4 11l5 5M4 11h10a6 6 0 0 1 0 8h-4"/></svg></span>
+      <span>逆翻訳で確認</span>
+    </button>
+  </div>
   <ol id="list" aria-label="文字起こし結果"></ol>
-  <h2 class="step"><b>3</b>取り出す</h2>
+  <h2 class="step"><b>4</b>取り出す</h2>
+  <div class="field outsel" id="outsel" hidden>
+    <span>出力</span>
+    <div class="seg" role="radiogroup" aria-label="書き出す言語">
+      <label><input type="radio" name="outlang" value="ja" checked><span>日本語</span></label>
+      <label><input type="radio" name="outlang" value="en"><span>英語</span></label>
+      <label><input type="radio" name="outlang" value="both"><span>日英</span></label>
+    </div>
+  </div>
   <div class="tools">
     <button class="key" id="copy" disabled>
       <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="1.5"/><path d="M16 8V6.5A1.5 1.5 0 0 0 14.5 5h-8A1.5 1.5 0 0 0 5 6.5v8A1.5 1.5 0 0 0 6.5 16H8"/></svg></span>
@@ -277,7 +313,7 @@ progress::-moz-progress-bar{background:var(--accent)}
     </button>
   </div>
 
-  <p class="note">初回はモデルのダウンロードが必要です（tiny 約40MB／base 約80MB／small 約250MB。2回目以降はキャッシュされます）。WebGPU対応のChromeだと速く動きます。行をクリックすると、その位置から再生します。</p>
+  <p class="note">初回はモデルのダウンロードが必要です（速さ優先 約40MB／標準 約80MB／精度優先 約250MB。2回目以降はキャッシュされます）。WebGPU対応のChromeだと速く動きます。行をクリックすると、その位置から再生します。</p>
   <p class="note">「タブの音声」：文字にしたい動画ページを別のタブで開いておき、このボタンを押して共有画面で「Chromeタブ」を選び、「タブの音声も共有」にチェックを入れて共有してください。動画を再生すると、15秒ごとにまとめて文字になります（Chromeのみ対応）。</p>
   <p class="note">個人で楽しむ範囲で、権利のある動画や、許可された動画にお使いください。再生しているサービスの利用規約もあわせてご確認ください。</p>
 </main>
@@ -427,12 +463,15 @@ function render(){
       p.spellcheck = false;
       p.addEventListener("input", () => {
         s.text = p.textContent.replace(/\s*\n\s*/g, " ");
+        if (s.en || s.back){ s.en = s.back = null; cell.querySelectorAll(".en,.back").forEach((n) => n.remove()); }
         if (s.flag){ s.flag = null; li.classList.remove("flag"); const w = cell.querySelector(".why"); if (w) w.remove(); }
       });
       p.addEventListener("keydown", (e) => { if (e.key === "Enter"){ e.preventDefault(); p.blur(); } });
       p.addEventListener("blur", () => { s.text = p.textContent.replace(/\s*\n\s*/g, " ").trim(); });
     }
     cell.append(p);
+    if (s.en){ const e = document.createElement("div"); e.className = "en"; e.textContent = s.en; cell.append(e); }
+    if (s.back){ const b = document.createElement("div"); b.className = "back"; b.textContent = "逆翻訳：" + s.back; cell.append(b); }
     if (s.flag){
       const w = document.createElement("small"); w.className = "why";
       w.textContent = "確認：" + s.flag; w.title = "クリックで確認済みにします";
@@ -473,7 +512,19 @@ videoEl.addEventListener("timeupdate", () => {
 });
 videoEl.addEventListener("seeked", () => { activeIdx = -2; videoEl.dispatchEvent(new Event("timeupdate")); });
 
-const plain = () => segs.filter((s) => s.text.trim()).map((s) => s.text).join("\n");
+const outMode = () => {
+  if (!segs.some((s) => s.en)) return "ja";
+  const e = document.querySelector('input[name="outlang"]:checked');
+  return e ? e.value : "ja";
+};
+function outLines(s){
+  const m = outMode(), ja = s.text.trim(), en = (s.en || "").trim();
+  if (m === "en") return en ? [en] : [];
+  if (m === "both") return [ja, en].filter(Boolean);
+  return ja ? [ja] : [];
+}
+const suf = () => ({ ja: "", en: "-en", both: "-ja-en" })[outMode()];
+const plain = () => segs.flatMap(outLines).join("\n");
 function download(name, text){
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
@@ -486,11 +537,12 @@ $("copy").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(plain()); setStatus("コピーしました"); }
   catch { setStatus("コピーできませんでした。テキスト保存を使ってください。", true); }
 });
-$("dltxt").addEventListener("click", () => download(base() + ".txt", plain()));
+$("dltxt").addEventListener("click", () => download(base() + suf() + ".txt", plain()));
 $("dlsrt").addEventListener("click", () => {
   if (segs.some((s) => s.start == null)){ setStatus("時刻のない文字は、字幕（.srt）にできません。テキストで保存してください。", true); return; }
-  const srt = segs.filter((s) => s.text.trim()).map((s, i) => (i + 1) + "\n" + srtTime(s.start) + " --> " + srtTime(s.end) + "\n" + s.text + "\n").join("\n");
-  download(base() + ".srt", srt);
+  const srt = segs.map((s) => ({ s, l: outLines(s) })).filter((x) => x.l.length)
+    .map((x, i) => (i + 1) + "\n" + srtTime(x.s.start) + " --> " + srtTime(x.s.end) + "\n" + x.l.join("\n") + "\n").join("\n");
+  download(base() + suf() + ".srt", srt);
 });
 
 /* ---- タブの音声をリアルタイムで文字起こし ---- */
@@ -661,6 +713,10 @@ function syncTools(){
   $("edit").classList.toggle("on", editing);
   $("editcap").textContent = editing ? "直し終わり" : "文字を直す";
   $("load").disabled = busy;
+  const hasEn = segs.some((s) => s.en);
+  $("tr").disabled = !has || busy;
+  $("back").disabled = !hasEn || busy;
+  $("outsel").hidden = !hasEn;
 }
 function resync(){ activeIdx = -2; videoEl.dispatchEvent(new Event("timeupdate")); }
 
@@ -692,7 +748,7 @@ $("rbtn").addEventListener("click", () => {
   let n = 0;
   segs.forEach((s) => {
     const parts = s.text.split(f);
-    if (parts.length > 1){ n += parts.length - 1; s.text = parts.join(r); }
+    if (parts.length > 1){ n += parts.length - 1; s.text = parts.join(r); s.en = s.back = null; }
   });
   render(); resync();
   setStatus(n ? n + "か所を置換しました。" : "見つかりませんでした。", !n);
@@ -744,11 +800,125 @@ $("loadfile").addEventListener("change", async () => {
   setStatus("「" + f.name + "」を読み込みました（" + segs.length + "行）。" + (parsed[0].start == null ? "時刻はありません。" : ""));
 });
 
+/* ---- 英語にする（翻訳）・逆翻訳 ---- */
+const TR_CDN = "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1";
+const trCache = {};
+
+async function getTranslator(engine, dir){
+  const key = engine + ":" + dir;
+  if (trCache[key]) return trCache[key];
+  const [src, tgt] = dir.split("-");
+  let fn;
+  if (engine === "chrome"){
+    if (!("Translator" in self)) throw new Error("このブラウザには、内蔵の翻訳機能がありません。「スマホ用」を選んでください。");
+    const opts = { sourceLanguage: src, targetLanguage: tgt };
+    const av = await Translator.availability(opts);
+    if (av === "unavailable") throw new Error("この言語の組み合わせは、内蔵の翻訳では使えません。");
+    const t = await Translator.create({
+      ...opts,
+      monitor(m){
+        m.addEventListener("downloadprogress", (e) => {
+          setBar(e.loaded * 100);
+          setStatus("翻訳データをダウンロード中… " + Math.round(e.loaded * 100) + "%");
+        });
+      },
+    });
+    fn = (text) => t.translate(text);
+  } else {
+    const id = dir === "ja-en" ? "Xenova/opus-mt-ja-en" : "Xenova/opus-mt-en-jap";
+    setStatus("翻訳モデルを準備中…（初回はダウンロードします）");
+    setBar(0);
+    const { pipeline } = await import(TR_CDN);
+    const files = {};
+    const pipe = await pipeline("translation", id, {
+      progress_callback: (p) => {
+        if (p.status === "progress" && p.file){
+          files[p.file] = p.progress || 0;
+          const v = Object.values(files);
+          const avg = v.reduce((a, b) => a + b, 0) / v.length;
+          setBar(avg);
+          setStatus("翻訳モデルをダウンロード中… " + Math.round(avg) + "%");
+        }
+      },
+    });
+    fn = async (text) => {
+      const o = await pipe(text, { max_new_tokens: 256 });
+      return (o[0] && o[0].translation_text) || "";
+    };
+  }
+  trCache[key] = fn;
+  return fn;
+}
+
+function paintLine(i){
+  const li = listEl.children[i];
+  if (!li) return;
+  const cell = li.querySelector(".cell");
+  if (!cell) return;
+  const s = segs[i];
+  cell.querySelectorAll(".en,.back").forEach((n) => n.remove());
+  const anchor = cell.querySelector(".why");
+  const add = (cls, txt) => {
+    const d = document.createElement("div"); d.className = cls; d.textContent = txt;
+    if (anchor) cell.insertBefore(d, anchor); else cell.append(d);
+  };
+  if (s.en) add("en", s.en);
+  if (s.back) add("back", "逆翻訳：" + s.back);
+}
+
+async function runTranslate(kind){
+  if (busy) return;
+  if (kind === "en" && val("lang") === "english"){
+    setStatus("言語が English のときは、英語への翻訳はできません。", true);
+    return;
+  }
+  const engine = val("tengine");
+  const targets = [];
+  segs.forEach((s, i) => { if (kind === "en" ? s.text.trim() : s.en) targets.push(i); });
+  if (!targets.length) return;
+  setBusy(true); render();
+  try {
+    const fn = await getTranslator(engine, kind === "en" ? "ja-en" : "en-ja");
+    setBar(null);
+    let n = 0;
+    for (const i of targets){
+      const s = segs[i];
+      const out = ((await fn(kind === "en" ? s.text : s.en)) || "").trim();
+      if (kind === "en"){ s.en = out; s.back = null; } else { s.back = out; }
+      paintLine(i);
+      n++;
+      setBar((n / targets.length) * 100);
+      setStatus((kind === "en" ? "英語にしています… " : "日本語に戻しています… ") + n + " / " + targets.length);
+    }
+    setBar(null);
+    setStatus(kind === "en"
+      ? "英語にしました。気になる行は「逆翻訳で確認」で見てみましょう。"
+      : "逆翻訳を表示しました。元の意味とずれている行がないか、確認してください。");
+  } catch (e){
+    console.error(e);
+    setBar(null);
+    setStatus("エラー：" + (e && e.message ? e.message : e), true);
+  } finally {
+    setBusy(false); render();
+  }
+}
+$("tr").addEventListener("click", () => runTranslate("en"));
+$("back").addEventListener("click", () => runTranslate("back"));
+
+const TENGINE_HINT = {
+  chrome: "Chromeに入っている翻訳機能を使います。精度優先・PC専用（初回に翻訳データをダウンロード）",
+  local: "ブラウザの中で動く小さな翻訳モデルを使います。精度ひかえめ・スマホでも動きます（初回にモデルをダウンロード）",
+};
+const showTHint = () => { $("tenginehint").textContent = TENGINE_HINT[val("tengine")] || ""; };
+document.querySelectorAll('input[name="tengine"]').forEach((r) => r.addEventListener("change", showTHint));
+if (!("Translator" in self)) document.querySelector('input[name="tengine"][value="local"]').checked = true;
+showTHint();
+
 /* ---- モデルの説明 ---- */
 const MODEL_HINT = {
-  "onnx-community/whisper-tiny": "いちばん速い・精度はひかえめ（初回 約40MB）",
-  "onnx-community/whisper-base": "標準・速さと精度のバランス型（初回 約80MB）",
-  "onnx-community/whisper-small": "時間はかかるけど精度が高い（初回 約250MB）",
+  "onnx-community/whisper-tiny": "いちばん速い・精度はひかえめ（tiny・初回 約40MB）",
+  "onnx-community/whisper-base": "速さと精度のバランス型（base・初回 約80MB）",
+  "onnx-community/whisper-small": "時間はかかるけど精度が高い（small・初回 約250MB）",
 };
 const showHint = () => { $("modelhint").textContent = MODEL_HINT[val("model")] || ""; };
 document.querySelectorAll('input[name="model"]').forEach((r) => r.addEventListener("change", showHint));
