@@ -218,6 +218,37 @@ progress::-moz-progress-bar{background:var(--accent)}
 @media (max-width:720px){ .cards{grid-template-columns:1fr} }
 @media (max-width:520px){ h1{font-size:1.9rem} .logo{width:44px; height:44px} .sub{font-size:.88rem} }
 @media (prefers-reduced-motion: reduce){ .go.tab.on i{animation:none} .go i, .drop{transition:none} }
+.rhead{display:flex; align-items:center; flex-wrap:wrap; gap:6px 16px; margin:22px 2px 10px; min-height:26px}
+.rtitle{margin:0; font-size:.92rem; font-weight:500}
+.work{display:inline-flex; align-items:center; gap:10px; font-size:.8rem; color:var(--muted)}
+.work[hidden],.local[hidden],.mode[hidden]{display:none}
+.mini{display:inline-flex; align-items:center; gap:3px; height:18px}
+.mini i{width:3px; height:100%; border-radius:2px; background:var(--accent); animation:bob 1.1s ease-in-out infinite}
+.mini i:nth-child(2){background:var(--sage); animation-delay:-.2s}
+.mini i:nth-child(3){background:var(--sand); animation-delay:-.4s}
+.mini i:nth-child(4){background:var(--clay); animation-delay:-.6s}
+.act{all:unset; box-sizing:border-box; display:inline-flex; align-items:center; gap:9px; min-height:44px; padding:0 18px; border:1.5px solid var(--ink); border-radius:10px; background:var(--panel); color:var(--ink); font-size:.88rem; font-weight:500; cursor:pointer; transition:transform .12s ease, background .15s, color .15s}
+.act svg{width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+.act:hover:not(:disabled){background:var(--ink); color:var(--panel); transform:translateY(-1px)}
+.act.primary{background:var(--ink); color:var(--panel)}
+.act.primary:hover:not(:disabled){background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.act:active:not(:disabled){transform:none}
+.act:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+.act:disabled{opacity:.4; cursor:not-allowed; border-style:dashed}
+.act.on{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.act.busy:disabled{opacity:1; border-style:solid; cursor:progress}
+.act.busy svg{display:none}
+.act.busy::before{content:""; width:16px; height:16px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{50%{opacity:.25}}
+.fix{align-items:center; flex-wrap:wrap}
+.fix .arrow{margin-top:0}
+.mode{display:inline-flex; align-items:center; gap:8px; font-size:.8rem; color:var(--ink)}
+.dot{width:8px; height:8px; border-radius:50%; background:var(--accent); animation:blink 1.4s ease-in-out infinite}
+.local{display:flex; align-items:center; flex-wrap:wrap; gap:6px 12px; margin:0 2px 12px; font-size:.8rem; color:var(--muted)}
+.local progress{flex:1 1 140px; width:auto; margin:0}
+.tools{display:flex; flex-wrap:wrap; gap:10px}
+@media (prefers-reduced-motion: reduce){ .mini i, .dot, .act.busy::before{animation:none} .act{transition:none} }
 </style>
 </head>
 <body>
@@ -227,7 +258,7 @@ progress::-moz-progress-bar{background:var(--accent)}
       <path class="a" d="M7 16v8"/><path class="b" d="M15 10v20"/><path class="c" d="M23 5v30"/><path class="d" d="M31 14v12"/>
     </svg>
     <div>
-      <h1>Kiki<span>tori</span><small>聞き取り</small></h1>
+      <h1>Kiki<span>tori</span><small>ききとり</small></h1>
       <p class="sub">ブラウザの中だけで動きます。動画・音声は外に送信されません。</p>
     </div>
   </header>
@@ -295,19 +326,20 @@ progress::-moz-progress-bar{background:var(--accent)}
     <video id="video" controls playsinline></video>
   </div>
 
+  <div class="rhead">
+    <h2 class="rtitle">文字起こしの結果</h2>
+    <span class="work" id="work" hidden><span class="mini" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="worktext"></span></span>
+  </div>
+  <ol id="list" aria-label="文字起こし結果"></ol>
+
   <h2 class="step"><b>2</b>直す<button class="linkbtn grow" id="load">保存した文字を読み込む</button></h2>
   <input type="file" id="loadfile" accept=".srt,.txt,text/plain" hidden>
   <p class="stephint">文字起こしが終わったら、左から順に使います。</p>
   <div class="fix">
-    <button class="key" id="check" disabled>
-      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-      <span>おかしな所を探す</span>
-    </button>
+    <button class="act primary" id="check" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>おかしな所を探す</span></button>
     <span class="arrow" aria-hidden="true">→</span>
-    <button class="key" id="edit" disabled>
-      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l1-4L16.5 4.5a1.8 1.8 0 0 1 2.5 2.5L8.5 17.5 5 19zM14.5 6.5l3 3"/></svg></span>
-      <span id="editcap">文字を直す</span>
-    </button>
+    <button class="act" id="edit" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l1-4L16.5 4.5a1.8 1.8 0 0 1 2.5 2.5L8.5 17.5 5 19zM14.5 6.5l3 3"/></svg><span id="editcap">文字を直す</span></button>
+    <span class="mode" id="editmode" hidden><i class="dot"></i>文字を直せます</span>
   </div>
   <div class="replace" id="replace" hidden>
     <input id="rfind" type="text" placeholder="直したい言葉" aria-label="直したい言葉">
@@ -315,6 +347,7 @@ progress::-moz-progress-bar{background:var(--accent)}
     <input id="rwith" type="text" placeholder="正しい言葉" aria-label="正しい言葉">
     <button id="rbtn">全部置換</button>
   </div>
+
   <h2 class="step"><b>3</b>英語にする<span class="opt">必要なときだけ</span></h2>
   <div class="field engine">
     <span>翻訳</span>
@@ -327,17 +360,12 @@ progress::-moz-progress-bar{background:var(--accent)}
     </div>
   </div>
   <div class="fix">
-    <button class="key" id="tr" disabled>
-      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.3 3.5 5 3.5 8s-1 5.7-3.5 8c-2.5-2.3-3.5-5-3.5-8s1-5.7 3.5-8z"/></svg></span>
-      <span>英語にする</span>
-    </button>
+    <button class="act primary" id="tr" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.3 3.5 5 3.5 8s-1 5.7-3.5 8c-2.5-2.3-3.5-5-3.5-8s1-5.7 3.5-8z"/></svg><span id="trcap">英語にする</span></button>
     <span class="arrow" aria-hidden="true">→</span>
-    <button class="key" id="back" disabled>
-      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6L4 11l5 5M4 11h10a6 6 0 0 1 0 8h-4"/></svg></span>
-      <span>逆翻訳で確認</span>
-    </button>
+    <button class="act" id="back" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6L4 11l5 5M4 11h10a6 6 0 0 1 0 8h-4"/></svg><span id="backcap">逆翻訳で確認</span></button>
   </div>
-  <ol id="list" aria-label="文字起こし結果"></ol>
+  <div class="local" id="trlocal" hidden><span class="mini" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span id="trtext"></span><progress id="trbar" max="100" value="0"></progress></div>
+
   <h2 class="step"><b>4</b>取り出す</h2>
   <div class="field outsel" id="outsel" hidden>
     <span>出力</span>
@@ -348,18 +376,9 @@ progress::-moz-progress-bar{background:var(--accent)}
     </div>
   </div>
   <div class="tools">
-    <button class="key" id="copy" disabled>
-      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="1.5"/><path d="M16 8V6.5A1.5 1.5 0 0 0 14.5 5h-8A1.5 1.5 0 0 0 5 6.5v8A1.5 1.5 0 0 0 6.5 16H8"/></svg></span>
-      <span>コピー</span>
-    </button>
-    <button class="key" id="dltxt" disabled>
-      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg></span>
-      <span>テキスト</span>
-    </button>
-    <button class="key" id="dlsrt" disabled>
-      <span class="disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg></span>
-      <span>字幕 .srt</span>
-    </button>
+    <button class="act" id="copy" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="1.5"/><path d="M16 8V6.5A1.5 1.5 0 0 0 14.5 5h-8A1.5 1.5 0 0 0 5 6.5v8A1.5 1.5 0 0 0 6.5 16H8"/></svg><span>コピー</span></button>
+    <button class="act" id="dltxt" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg><span>テキスト</span></button>
+    <button class="act" id="dlsrt" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg><span>字幕 .srt</span></button>
   </div>
 
   <p class="note">初回はモデルのダウンロードが必要です（速さ優先 約40MB／標準 約80MB／精度優先 約250MB。2回目以降はキャッシュされます）。WebGPU対応のChromeだと速く動きます。行をクリックすると、その位置から再生します。</p>
@@ -378,7 +397,13 @@ const videoEl = $("video"), listEl = $("list");
 const SR = 16000, WIN = 30 * SR;
 
 let currentFile = null, segs = [], asr = null, asrKey = "", busy = false, objUrl = null, mode = "file";
-function setBusy(b){ busy = b; if (b) editing = false; $("screen").classList.toggle("working", b); syncTools(); }
+let trActive = false;
+function setBusy(b){
+  busy = b; if (b) editing = false;
+  $("screen").classList.toggle("working", b);
+  $("work").hidden = !b; if (!b) $("worktext").textContent = "";
+  syncTools();
+}
 (function(){
   const w = $("wave"), cols = ["var(--accent)", "var(--sage)", "var(--sand)", "var(--clay)"];
   for (let i = 0; i < 36; i++){
@@ -389,8 +414,15 @@ function setBusy(b){ busy = b; if (b) editing = false; $("screen").classList.tog
   }
 })();
 
-function setStatus(msg, isErr = false){ statusEl.textContent = msg; statusEl.classList.toggle("err", isErr); }
-function setBar(v){ if (v == null){ barEl.hidden = true; return; } barEl.hidden = false; barEl.value = v; }
+function setStatus(msg, isErr = false){
+  statusEl.textContent = msg; statusEl.classList.toggle("err", isErr);
+  if (busy) $("worktext").textContent = msg;
+  if (trActive) $("trtext").textContent = msg;
+}
+function setBar(v){
+  if (trActive && v != null) $("trbar").value = v;
+  if (v == null){ barEl.hidden = true; return; } barEl.hidden = false; barEl.value = v;
+}
 const pad = (n, w = 2) => String(Math.floor(n)).padStart(w, "0");
 function mmss(t){ return pad(t / 60) + ":" + pad(t % 60); }
 function srtTime(t){
@@ -771,6 +803,7 @@ function syncTools(){
   $("check").disabled = !has || busy;
   $("replace").hidden = !(editing && has);
   $("edit").classList.toggle("on", editing);
+  $("editmode").hidden = !editing;
   $("editcap").textContent = editing ? "直し終わり" : "文字を直す";
   $("load").disabled = busy;
   const hasEn = segs.some((s) => s.en);
@@ -938,6 +971,9 @@ async function runTranslate(kind){
   segs.forEach((s, i) => { if (kind === "en" ? s.text.trim() : s.en) targets.push(i); });
   if (!targets.length) return;
   setBusy(true); render();
+  const btn = $(kind === "en" ? "tr" : "back"), cap = $(kind === "en" ? "trcap" : "backcap"), capOld = cap.textContent;
+  btn.classList.add("busy"); cap.textContent = kind === "en" ? "英語にしています…" : "日本語に戻しています…";
+  trActive = true; $("trlocal").hidden = false; $("trbar").value = 0;
   try {
     const fn = await getTranslator(engine, kind === "en" ? "ja-en" : "en-ja");
     setBar(null);
@@ -960,6 +996,8 @@ async function runTranslate(kind){
     setBar(null);
     setStatus("エラー：" + (e && e.message ? e.message : e), true);
   } finally {
+    trActive = false; $("trlocal").hidden = true;
+    btn.classList.remove("busy"); cap.textContent = capOld;
     setBusy(false); render();
   }
 }
