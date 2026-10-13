@@ -180,6 +180,11 @@ progress::-moz-progress-bar{background:var(--accent)}
 .engine .mwrap{min-width:0}
 #list .en{margin-top:4px; padding-left:10px; border-left:2px solid var(--accent); font-size:.92rem}
 #list .back{margin-top:2px; padding-left:10px; font-size:.78rem; color:var(--muted)}
+.credit{margin:22px 2px 0; padding-top:12px; border-top:1px solid var(--line); font-size:.72rem; line-height:1.7; color:var(--muted)}
+.credit p{margin:0}
+.credit a{color:inherit; text-decoration:underline; text-underline-offset:2px}
+.credit a:hover{color:var(--ink)}
+.credit a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 </style>
 </head>
 <body>
@@ -316,6 +321,9 @@ progress::-moz-progress-bar{background:var(--accent)}
   <p class="note">初回はモデルのダウンロードが必要です（速さ優先 約40MB／標準 約80MB／精度優先 約250MB。2回目以降はキャッシュされます）。WebGPU対応のChromeだと速く動きます。行をクリックすると、その位置から再生します。</p>
   <p class="note">「タブの音声」：文字にしたい動画ページを別のタブで開いておき、このボタンを押して共有画面で「Chromeタブ」を選び、「タブの音声も共有」にチェックを入れて共有してください。動画を再生すると、15秒ごとにまとめて文字になります（Chromeのみ対応）。</p>
   <p class="note">個人で楽しむ範囲で、権利のある動画や、許可された動画にお使いください。再生しているサービスの利用規約もあわせてご確認ください。</p>
+  <footer class="credit">
+    <p>文字起こし：<a href="https://github.com/openai/whisper" target="_blank" rel="noopener noreferrer">OpenAI Whisper</a>（MIT License, © OpenAI）／ 実行：<a href="https://github.com/huggingface/transformers.js" target="_blank" rel="noopener noreferrer">Transformers.js</a>（Apache-2.0）／ 翻訳：Chromeの内蔵翻訳、または<a href="https://huggingface.co/Helsinki-NLP" target="_blank" rel="noopener noreferrer">Helsinki-NLP OPUS-MT</a>（CC BY 4.0／Apache-2.0）。ライセンスの詳細は、各リンク先をご確認ください。</p>
+  </footer>
 </main>
 
 <script type="module">
@@ -825,22 +833,23 @@ async function getTranslator(engine, dir){
     });
     fn = (text) => t.translate(text);
   } else {
-    const id = dir === "ja-en" ? "Xenova/opus-mt-ja-en" : "Xenova/opus-mt-en-jap";
+    const id = dir === "ja-en" ? "onnx-community/opus-mt-ja-en" : "Xenova/opus-mt-en-jap";
     setStatus("翻訳モデルを準備中…（初回はダウンロードします）");
     setBar(0);
     const { pipeline } = await import(TR_CDN);
     const files = {};
-    const pipe = await pipeline("translation", id, {
-      progress_callback: (p) => {
-        if (p.status === "progress" && p.file){
-          files[p.file] = p.progress || 0;
-          const v = Object.values(files);
-          const avg = v.reduce((a, b) => a + b, 0) / v.length;
-          setBar(avg);
-          setStatus("翻訳モデルをダウンロード中… " + Math.round(avg) + "%");
-        }
-      },
-    });
+    const onProgress = (p) => {
+      if (p.status === "progress" && p.file){
+        files[p.file] = p.progress || 0;
+        const v = Object.values(files);
+        const avg = v.reduce((a, b) => a + b, 0) / v.length;
+        setBar(avg);
+        setStatus("翻訳モデルをダウンロード中… " + Math.round(avg) + "%");
+      }
+    };
+    let pipe;
+    try { pipe = await pipeline("translation", id, { progress_callback: onProgress }); }
+    catch (e1){ pipe = await pipeline("translation", id, { dtype: "fp32", progress_callback: onProgress }); }
     fn = async (text) => {
       const o = await pipe(text, { max_new_tokens: 256 });
       return (o[0] && o[0].translation_text) || "";
